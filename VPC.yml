@@ -1,0 +1,44 @@
+Resources:
+
+ # First, VPCs:
+
+  Description: Create VPCs.
+Parameters:
+  InstanceCount:
+    Description: Number of VPCs (must be between 1 and 5).
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 5
+    ConstraintDescription: Must be a number between 1 and 5
+Conditions:
+  Launch1: !Equals [1, 1]
+  Launch2: !Not [!Equals [1, !Ref InstanceCount]]
+Resources:
+  ProductionReplica:
+    Condition: Launch1
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true 
+      Tags:
+      - Key: Name
+        Value: ProductionReplica
+          
+  Production:
+    Condition: Launch2
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 12.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+      - Key: Name
+        Value: Production
+      
+          
+     
+        
+
+        
