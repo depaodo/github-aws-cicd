@@ -1,0 +1,64 @@
+
+#EC2 Instances and VPCs
+AWSTemplateFormatVersion: 2010-09-09
+Description: EC2-VPCs for Dev
+Parameters: # Parameters for EC2 instances 
+  InstanceCount:
+    Description: Number of EC2 instances (must be between 1 and 5).
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 5
+    ConstraintDescription: Must be a number between 1 and 5.
+  ImageId:
+    Description: Image ID to launch EC2 instances.
+    Type: AWS::EC2::Image::Id
+    Default: ami-9be6f38c
+  InstanceType:
+    Description: Instance type to launch EC2 instances.
+    Type: String
+    Default: t2.micro
+    AllowedValues: [ t2.micro, m3.medium, m3.large, m3.xlarge, m3.2xlarge ]
+
+Conditions: # Launch Conditions 
+  Launch1: !Equals [1, 1]
+  Launch2: !Not [!Equals [1, !Ref InstanceCount]]
+  Launch3: !Equals [3, 3]
+  Launch4: !Not [!Equals [3, !Ref InstanceCount]]
+
+
+Resources: #Builds Dev VPC, Subnet, and EC2 instance
+  
+  rProdVPC:
+    Condition: Launch1
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 12.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true 
+      Tags:
+       - Key: Name
+         Value: rProdVPC
+
+  rProdSubnet:
+    Condition: Launch2
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref rProdVPC
+      CidrBlock: 12.0.1.0/24
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+         - Key: Name
+           Value: rProdSubnet
+
+  rProductionEC2:
+   Condition: Launch3
+   Type: AWS::EC2::Instance
+   Properties:
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      Tags:
+      - Key: Name
+        Value: rProdEC2
+      SubnetId: !Ref rProdSubnet
